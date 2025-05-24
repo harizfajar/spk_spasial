@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "777586473125",
+    "project_id": "learning-app-7775e",
+    "storage_bucket": "learning-app-7775e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:777586473125:android:d33957da8d270e404e354c",
+        "android_client_info": {
+          "package_name": "com.example.projectriverpod"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD4JM7wdkXIW3e79_HSK9eC5xnqziuWZls"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:777586473125:android:92f24576007e17df4e354c",
+        "android_client_info": {
+          "package_name": "com.example.spk"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD4JM7wdkXIW3e79_HSK9eC5xnqziuWZls"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
