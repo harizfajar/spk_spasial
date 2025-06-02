@@ -6,7 +6,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'maps_notifier.g.dart';
 
 @riverpod
-class MapsNotifier extends _$MapsNotifier {
+class LokasiNotifier extends _$LokasiNotifier {
   @override
   LatLng? build() {
     // Nilai awal state = null

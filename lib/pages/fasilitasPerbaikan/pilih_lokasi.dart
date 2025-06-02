@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:latlong2/latlong.dart';
-import 'package:spk/pages/addPerbaikan/notifier/add_perbaikan_notifier.dart';
+import 'package:spk/pages/fasilitasPerbaikan/notifier/perbaikan_notifier.dart';
 import 'package:spk/pages/map/notifier/maps_notifier.dart';
 
 class PilihLokasi extends ConsumerStatefulWidget {
@@ -13,44 +13,51 @@ class PilihLokasi extends ConsumerStatefulWidget {
 }
 
 class _PilihLokasiState extends ConsumerState<PilihLokasi> {
-  LatLng? _pickedLocation;
-  LatLng? initialPosition;
-
-  void _handleTap(TapPosition tapPosition, LatLng latlng) {
-    setState(() {
-      _pickedLocation = latlng;
-    });
-  }
-
-  void initState() {
-    super.initState();
-    ref.read(mapsNotifierProvider.notifier).updateLocation();
-  }
+  // void initState() {
+  //   super.initState();
+  //   ref.read(lokasiNotifierProvider.notifier).updateLocation();
+  // }
 
   @override
   Widget build(BuildContext context) {
-    final initialPosition = ref.watch(mapsNotifierProvider);
+    final lokasiNotifier = ref.read(lokasiNotifierProvider.notifier);
+    final initialPosition = ref.watch(lokasiNotifierProvider);
+    final fasilitas = ref.watch(perbaikanNotifierProvider);
+    final fasilitasNotifier = ref.read(perbaikanNotifierProvider.notifier);
     return Scaffold(
       appBar: AppBar(title: Text("Pilih Lokasi di Peta")),
       body:
-          initialPosition != null
-              ? FlutterMap(
+          initialPosition == null
+              ? Text("Tunggu...")
+              : FlutterMap(
                 options: MapOptions(
                   initialCenter: initialPosition,
                   initialZoom: 15,
-                  onTap: _handleTap,
+                  onTap: (tapPosition, latlng) {
+                    fasilitasNotifier.setLocation(latlng);
+                  },
                 ),
+
                 children: [
                   TileLayer(
                     urlTemplate:
                         'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                     userAgentPackageName: 'com.example.app',
                   ),
-                  if (_pickedLocation != null)
+                  CurrentLocationLayer(
+                    style: LocationMarkerStyle(
+                      marker: const DefaultLocationMarker(
+                        child: Icon(Icons.location_on, color: Colors.white),
+                      ),
+                      markerSize: const Size(35, 35),
+                      markerDirection: MarkerDirection.heading,
+                    ),
+                  ),
+                  if (fasilitas.lokasi != null)
                     MarkerLayer(
                       markers: [
                         Marker(
-                          point: _pickedLocation!,
+                          point: fasilitas.lokasi!,
                           width: 40,
                           height: 40,
                           child: Icon(
@@ -62,16 +69,10 @@ class _PilihLokasiState extends ConsumerState<PilihLokasi> {
                       ],
                     ),
                 ],
-              )
-              : Text("Tunggu..."),
+              ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          if (_pickedLocation != null) {
-            ref
-                .read(pilihLokasiNotifierProvider.notifier)
-                .setLocation(_pickedLocation!);
-            Navigator.pop(context);
-          }
+          Navigator.pop(context);
         },
         child: Icon(Icons.check),
       ),

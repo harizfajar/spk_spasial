@@ -5,9 +5,6 @@ class FasilitasModel {
   final String? id;
   final String? nama;
   final int? kerusakan;
-  final int? wargaTerdampak;
-  final int? biaya;
-  final int? kepadatan;
   final String? kecamatan;
   final LatLng? lokasi;
   final DateTime? createdAt;
@@ -16,9 +13,6 @@ class FasilitasModel {
     this.id,
     this.nama,
     this.kerusakan,
-    this.wargaTerdampak,
-    this.biaya,
-    this.kepadatan,
     this.kecamatan,
     this.lokasi,
     this.createdAt,
@@ -27,23 +21,17 @@ class FasilitasModel {
     final String? id,
     final String? nama,
     final int? kerusakan,
-    final int? wargaTerdampak,
-    final int? biaya,
-    final int? kepadatan,
     final String? kecamatan,
     final LatLng? lokasi,
     final DateTime? createdAt,
   }) {
     return FasilitasModel(
-      id: id,
-      nama: nama,
-      kerusakan: kerusakan,
-      wargaTerdampak: wargaTerdampak,
-      biaya: biaya,
-      kepadatan: kepadatan,
-      kecamatan: kecamatan,
-      lokasi: lokasi,
-      createdAt: createdAt,
+      id: id ?? this.id,
+      nama: nama ?? this.nama,
+      kerusakan: kerusakan ?? this.kerusakan,
+      kecamatan: kecamatan ?? this.kecamatan,
+      lokasi: lokasi ?? this.lokasi,
+      createdAt: createdAt ?? this.createdAt,
     );
   }
 
@@ -54,8 +42,6 @@ class FasilitasModel {
       id: id,
       nama: map['nama'] ?? '',
       kerusakan: map['kerusakan'] ?? 0,
-      wargaTerdampak: map['warga_terdampak'] ?? 0,
-      kepadatan: map['kepadatan'] ?? 0,
       kecamatan: map['kecamatan'] ?? '',
       lokasi: LatLng(lokasiMap['lat'] ?? 0.0, lokasiMap['lng'] ?? 0.0),
       createdAt: (map['created_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
@@ -65,6 +51,7 @@ class FasilitasModel {
     final lokasiMap = map['lokasi'] ?? {};
 
     return FasilitasModel(
+      nama: map['nama_fasilitas'] ?? '',
       lokasi: LatLng(
         lokasiMap['latitude'] ?? 0.0,
         lokasiMap['longitude'] ?? 0.0,
@@ -76,8 +63,6 @@ class FasilitasModel {
     return {
       'nama': nama,
       'kerusakan': kerusakan,
-      'warga_terdampak': wargaTerdampak,
-      'kepadatan': kepadatan,
       'kecamatan': kecamatan,
       'lokasi': {'lat': lokasi!.latitude, 'lng': lokasi!.longitude},
       'created_at': Timestamp.now(),

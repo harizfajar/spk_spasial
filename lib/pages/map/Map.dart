@@ -4,9 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:spk/pages/addPerbaikan/notifier/add_perbaikan_notifier.dart';
+import 'package:spk/pages/fasilitasPerbaikan/notifier/perbaikan_notifier.dart';
 import 'package:spk/pages/map/notifier/maps_notifier.dart';
 import 'package:spk/route/route_names.dart';
+import 'package:spk/services/haversine_services.dart';
+import 'package:spk/widgets/drawer.dart';
 
 class Maps extends ConsumerStatefulWidget {
   const Maps({super.key});
@@ -24,16 +26,18 @@ class _MapsState extends ConsumerState<Maps> {
   void initState() {
     super.initState();
     // determinePosition();
-    ref.read(mapsNotifierProvider.notifier).updateLocation();
+    ref.read(lokasiNotifierProvider.notifier).updateLocation();
   }
 
   @override
   Widget build(BuildContext context) {
-    final initialPosition = ref.watch(mapsNotifierProvider);
-    final fasilitasAsync = ref.watch(fasilitasProvider);
+    final initialPosition = ref.watch(lokasiNotifierProvider);
+    final initialPosNotifier = ref.read(lokasiNotifierProvider.notifier);
+    final fasilitasAsync = ref.watch(fasilitasRusakProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text("Peta Lokasi")),
+      drawer: DrawerCust(),
       body: fasilitasAsync.when(
         data:
             (fasilitasList) =>
@@ -44,8 +48,8 @@ class _MapsState extends ConsumerState<Maps> {
                       options: MapOptions(
                         initialCenter: initialPosition,
                         initialZoom: 18.0,
-                        minZoom: 0,
-                        maxZoom: 18,
+                        // minZoom: 0,
+                        // maxZoom: 0,
                         onTap: (tapPosition, latLng) {
                           debugPrint(
                             "Koordinat dipilih ${latLng.latitude}, ${latLng.longitude}",
@@ -89,8 +93,17 @@ class _MapsState extends ConsumerState<Maps> {
                                   f.lokasi!.longitude,
                                 ),
                                 child: Icon(
-                                  Icons.location_on,
-                                  color: Colors.red,
+                                  f.nama == "Jalan"
+                                      ? Icons.remove_road
+                                      : f.nama == "Saluran Air"
+                                      ? Icons.water
+                                      : Icons.light,
+                                  color:
+                                      f.nama == "Jalan"
+                                          ? Colors.red
+                                          : f.nama == "Saluran Air"
+                                          ? Colors.blue
+                                          : Colors.orange,
                                   size: 40,
                                 ),
                               );
@@ -128,15 +141,15 @@ class _MapsState extends ConsumerState<Maps> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton(
-            child: const Icon(Icons.my_location),
             heroTag: 'my_location',
+            child: Icon(Icons.my_location),
             onPressed: () async {
               // setState(() {
               //   currentPosition = null;
               // });
               final newLocation =
                   await ref
-                      .read(mapsNotifierProvider.notifier)
+                      .read(lokasiNotifierProvider.notifier)
                       .updateLocation();
 
               if (newLocation != null) {
