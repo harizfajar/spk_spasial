@@ -32,17 +32,13 @@ class FirebaseServices {
     }
   }
 
-  Future<void> addKriteria({
-    String? nama,
-    String? jenis,
-    double? bobot,
-  }) async {
+  Future<void> addKriteria({String? nama, String? jenis, double? bobot}) async {
     try {
       final snapshot = await db.collection("kriteria").get();
       final currentCount = snapshot.docs.length;
 
       await db.collection("kriteria").add({
-        "kode": "K${currentCount + 1}",
+        "kode": currentCount + 1,
         "nama": nama,
         "jenis": jenis,
         "bobot": bobot,

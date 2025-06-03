@@ -1,36 +1,51 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class KriteriaModel {
-  String? kode;
+  int? kode;
   String? nama;
-  String? bobot;
+  double? bobot;
   String? jenis;
+  String? id; // ID dokumen Firestore, tidak perlu disalin
 
-  KriteriaModel({this.kode, this.nama, this.bobot, this.jenis});
+  KriteriaModel({this.kode, this.nama, this.bobot, this.jenis, this.id});
 
   KriteriaModel copy({
-    String? kode,
+    int? kode,
     String? nama,
-    String? bobot,
+    double? bobot,
     String? jenis,
+    String? id,
   }) {
     return KriteriaModel(
       kode: kode ?? this.kode,
       nama: nama ?? this.nama,
       bobot: bobot ?? this.bobot,
       jenis: jenis ?? this.jenis,
+      id: id ?? this.id, // ID tidak perlu disalin karena bukan field Firestore
     );
   }
 
-  KriteriaModel FromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
+  factory KriteriaModel.fromMap(Map<String, dynamic> map, {String? id}) {
+    return KriteriaModel(
+      id: id,
+      kode: map['kode'] as int?,
+      nama: map['nama'] as String?,
+      bobot: map['bobot'] as double?,
+      jenis: map['jenis'] as String?,
+    );
+  }
+
+  factory KriteriaModel.fromFirestore(
+    DocumentSnapshot<Map<String, dynamic>> doc,
+  ) {
     final data = doc.data();
     if (data == null) {
       throw Exception("Data kriteria kosong untuk dokumen ${doc.id}");
     }
     return KriteriaModel(
-      kode: data['kode'] as String?,
+      kode: data['kode'] as int?,
       nama: data['nama'] as String?,
-      bobot: data['bobot'] as String?,
+      bobot: data['bobot'] as double?,
       jenis: data['jenis'] as String?,
     );
   }
