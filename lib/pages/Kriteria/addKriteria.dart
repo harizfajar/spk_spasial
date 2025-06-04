@@ -75,7 +75,7 @@ class _AddKriteriaState extends ConsumerState<AddKriteria> {
               ButtonCust(
                 onPressed: () {
                   if (!formKey.currentState!.validate()) {
-                    showErrorSnackBar(context);
+                    showSnackBar(context);
                     return;
                   }
                   kriteriaNotifier.addKriteria(

@@ -1,7 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:spk/model/fasilitas_model.dart';
 
 part 'maps_notifier.g.dart';
 
@@ -46,3 +48,20 @@ class LokasiNotifier extends _$LokasiNotifier {
     }
   }
 }
+
+final fasilitasRusakProvider = StreamProvider.autoDispose<List<FasilitasModel>>(
+  (ref) {
+    return FirebaseFirestore.instance
+        .collection("fasilitas_umum")
+        .snapshots()
+        .map(
+          (snapshots) =>
+              snapshots.docs
+                  .map(
+                    (doc) =>
+                        FasilitasModel.fromMapLokasi(doc.data(), id: doc.id),
+                  )
+                  .toList(),
+        );
+  },
+);

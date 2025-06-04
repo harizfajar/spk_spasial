@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:spk/model/kecamatan_model.dart';
 
@@ -9,16 +10,20 @@ class FirebaseServices {
     String? namaFasilitas,
     int? tingkatKerusakan,
     String? lokasiKecamatan,
-    double? jarakKeKecamatan,
+    int? jumlahPenduduk,
+    int? kepadatan,
+    double? jarakKeIstana,
     LatLng? lokasi,
   }) async {
     try {
       await db.collection("fasilitas_umum").add({
         "nama_fasilitas": namaFasilitas,
         "tingkat_kerusakan": tingkatKerusakan,
+        "jumlah_penduduk": jumlahPenduduk,
+        "kepadatan_penduduk": kepadatan,
         "lokasi_kecamatan": lokasiKecamatan,
         "prioritas": 0, // Default priority
-        "jarak_ke_kecamatan": jarakKeKecamatan,
+        "jarak_ke_istana": jarakKeIstana,
         "skor_saw": 0, // Default score
         "lokasi": {
           "latitude": lokasi?.latitude,
@@ -27,8 +32,54 @@ class FirebaseServices {
         "created_at": FieldValue.serverTimestamp(),
       });
     } catch (e) {
-      print("ERROR ADD FASILITAS $e");
+      debugPrint("ERROR ADD FASILITAS $e");
       throw Exception('Gagal menyimpan data: $e');
+    }
+  }
+
+  Future<void> updatePerbaikan({
+    String? namaFasilitas,
+    int? tingkatKerusakan,
+    String? lokasiKecamatan,
+    int? jumlahPenduduk,
+    int? kepadatan,
+    double? jarakKeIstana,
+    LatLng? lokasi,
+    String? id,
+  }) async {
+    db
+        .collection("fasilitas_umum")
+        .doc(id)
+        .update({
+          "nama_fasilitas": namaFasilitas,
+          "tingkat_kerusakan": tingkatKerusakan,
+          "jumlah_penduduk": jumlahPenduduk,
+          "kepadatan_penduduk": kepadatan,
+          "lokasi_kecamatan": lokasiKecamatan,
+          "prioritas": 0, // Default priority
+          "jarak_ke_istana": jarakKeIstana,
+          "skor_saw": 0, // Default score
+          "lokasi": {
+            "latitude": lokasi?.latitude,
+            "longitude": lokasi?.longitude,
+          },
+          "created_at": FieldValue.serverTimestamp(),
+        })
+        .then((value) {
+          debugPrint("Data berhasil diubah");
+        })
+        .catchError((error) {
+          debugPrint("error $error");
+          throw Exception('Gagal menyimpan data: $error');
+        });
+  }
+
+  Future<void> deletePerbaikan({String? id}) async {
+    try {
+      await db.collection("fasilitas_umum").doc(id).delete();
+    } catch (e) {
+      debugPrint("Gagal menghapus data: $e");
+      throw Exception('Gagal menghapus data: $e');
     }
   }
 
@@ -45,7 +96,7 @@ class FirebaseServices {
         "created_at": FieldValue.serverTimestamp(),
       });
     } catch (e) {
-      print("ERROR ADD KRITERIA $e");
+      debugPrint("ERROR ADD KRITERIA $e");
       throw Exception('Gagal menyimpan data: $e');
     }
   }
@@ -64,7 +115,7 @@ class FirebaseServices {
         "created_at": FieldValue.serverTimestamp(),
       });
     } catch (e) {
-      print("ERROR ADD KRITERIA $e");
+      debugPrint("ERROR ADD KRITERIA $e");
       throw Exception('Gagal menyimpan data: $e');
     }
   }
@@ -74,17 +125,17 @@ class FirebaseServices {
       final snapshot = await db.collection("kecamatan").get();
       List<KecamatanModel> kecamatanList = [];
       for (var doc in snapshot.docs) {
-        print("Kecamatan: ${doc.data()}");
+        debugPrint("Kecamatan: ${doc.data()}");
         kecamatanList.add(
           KecamatanModel.fromFirestore(
             doc as DocumentSnapshot<Map<String, dynamic>>,
           ),
         );
       }
-      print("Jumlah kecamatan: ${kecamatanList.length}");
+      debugPrint("Jumlah kecamatan: ${kecamatanList.length}");
       return kecamatanList;
     } catch (e) {
-      print("ERROR GET KECAMATAN $e");
+      debugPrint("ERROR GET KECAMATAN $e");
       throw Exception('Gagal mengambil data kecamatan: $e');
     }
   }

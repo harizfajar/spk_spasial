@@ -87,8 +87,8 @@ class _AddPerbaikanState extends ConsumerState<AddPerbaikan> {
                     ),
                     child: Text(
                       textAlign: TextAlign.start,
-                      fasilitas.lokasi != null
-                          ? 'Lat: ${fasilitas.lokasi!.latitude.toStringAsFixed(5)}, Lng: ${fasilitas.lokasi!.longitude.toStringAsFixed(5)}'
+                      fasilitas.value!.lokasi != null
+                          ? 'Lat: ${fasilitas.value!.lokasi!.latitude.toStringAsFixed(5)}, Lng: ${fasilitas.value!.lokasi!.longitude.toStringAsFixed(5)}'
                           : "Pilih Lokasi",
                       style: TextStyle(fontSize: 16, color: Colors.black),
                     ),
@@ -109,7 +109,7 @@ class _AddPerbaikanState extends ConsumerState<AddPerbaikan> {
                 SizedBox(height: 8),
                 DropdownbuttonCust(
                   onChanged: (p0) => fasilitasNotifier.kerusakan(p0),
-                  value: fasilitas.kerusakan,
+                  value: fasilitas.value!.kerusakan,
                 ),
 
                 SizedBox(height: 8),
@@ -149,7 +149,7 @@ class _AddPerbaikanState extends ConsumerState<AddPerbaikan> {
                     fasilitasNotifier.kecamatan(value!);
                     print("Dipilih: $value");
                   },
-                  selectedItem: fasilitas.kecamatan, // Bind ke state
+                  selectedItem: fasilitas.value!.kecamatan, // Bind ke state
                   validator:
                       (item) =>
                           item == null || item.isEmpty
@@ -160,32 +160,23 @@ class _AddPerbaikanState extends ConsumerState<AddPerbaikan> {
                 SizedBox(height: 16),
                 Center(
                   child: ButtonCust(
+                    text: fasilitas.isLoading ? "Loading..." : "Simpan",
                     onPressed: () {
-                      if (fasilitas.lokasi != null) {
+                      if (fasilitas.value?.lokasi != null) {
                         boolN.setBool(true);
                       } else {
                         boolN.setBool(false);
                       }
-                      print(bool);
+
                       if (!formKey.currentState!.validate()) {
-                        showErrorSnackBar(context);
+                        showSnackBar(
+                          context,
+                          message: "Lengkapi data terlebih dahulu",
+                        );
                         return;
                       }
-                      final jarak = hitungJarak(
-                        fasilitas.lokasi!.latitude,
-                        fasilitas.lokasi!.longitude,
-                        IstanaPresiden!.latitude,
-                        IstanaPresiden.longitude,
-                      );
 
-                      fasilitasNotifier.addPerbaikan(
-                        context,
-                        namaFasilitas: fasilitas.nama,
-                        tingkatKerusakan: fasilitas.kerusakan,
-                        lokasiKecamatan: fasilitas.kecamatan,
-                        lokasi: fasilitas.lokasi,
-                        jarak: jarak,
-                      );
+                      fasilitasNotifier.addPerbaikan(context);
                     },
                   ),
                 ),

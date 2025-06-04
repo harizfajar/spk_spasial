@@ -41,22 +41,24 @@ final boolNotifierProvider =
     );
 
 typedef _$BoolNotifier = AutoDisposeNotifier<bool?>;
-String _$perbaikanNotifierHash() => r'9635272e18f848e915962c4207f856ad2abbe9ba';
+String _$perbaikanNotifierHash() => r'dbd1bc1fc253a83624f4a3cfa65c1469fdd72b64';
 
 /// See also [PerbaikanNotifier].
 @ProviderFor(PerbaikanNotifier)
-final perbaikanNotifierProvider =
-    AutoDisposeNotifierProvider<PerbaikanNotifier, FasilitasModel>.internal(
-      PerbaikanNotifier.new,
-      name: r'perbaikanNotifierProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$perbaikanNotifierHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+final perbaikanNotifierProvider = AutoDisposeAsyncNotifierProvider<
+  PerbaikanNotifier,
+  FasilitasModel
+>.internal(
+  PerbaikanNotifier.new,
+  name: r'perbaikanNotifierProvider',
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$perbaikanNotifierHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
-typedef _$PerbaikanNotifier = AutoDisposeNotifier<FasilitasModel>;
+typedef _$PerbaikanNotifier = AutoDisposeAsyncNotifier<FasilitasModel>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

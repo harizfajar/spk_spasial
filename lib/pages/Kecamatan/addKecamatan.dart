@@ -70,7 +70,7 @@ class _AddKecamatanState extends ConsumerState<AddKecamatan> {
               ElevatedButton(
                 onPressed: () {
                   if (!formKey.currentState!.validate()) {
-                    showErrorSnackBar(context);
+                    showSnackBar(context);
                     return;
                   }
                   kecamatanNotifier.addKecamatan(

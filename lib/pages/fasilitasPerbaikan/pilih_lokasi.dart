@@ -13,14 +13,8 @@ class PilihLokasi extends ConsumerStatefulWidget {
 }
 
 class _PilihLokasiState extends ConsumerState<PilihLokasi> {
-  // void initState() {
-  //   super.initState();
-  //   ref.read(lokasiNotifierProvider.notifier).updateLocation();
-  // }
-
   @override
   Widget build(BuildContext context) {
-    final lokasiNotifier = ref.read(lokasiNotifierProvider.notifier);
     final initialPosition = ref.watch(lokasiNotifierProvider);
     final fasilitas = ref.watch(perbaikanNotifierProvider);
     final fasilitasNotifier = ref.read(perbaikanNotifierProvider.notifier);
@@ -53,11 +47,11 @@ class _PilihLokasiState extends ConsumerState<PilihLokasi> {
                       markerDirection: MarkerDirection.heading,
                     ),
                   ),
-                  if (fasilitas.lokasi != null)
+                  if (fasilitas.value!.lokasi != null)
                     MarkerLayer(
                       markers: [
                         Marker(
-                          point: fasilitas.lokasi!,
+                          point: fasilitas.value!.lokasi!,
                           width: 40,
                           height: 40,
                           child: Icon(

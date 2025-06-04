@@ -6,6 +6,11 @@ class FasilitasModel {
   final String? nama;
   final int? kerusakan;
   final String? kecamatan;
+  final int? kepadatan;
+  final int? jumlahPenduduk;
+  final double? jarak;
+  final double? skor;
+  final int? prioritas;
   final LatLng? lokasi;
   final DateTime? createdAt;
 
@@ -14,7 +19,12 @@ class FasilitasModel {
     this.nama,
     this.kerusakan,
     this.kecamatan,
+    this.kepadatan,
+    this.jumlahPenduduk,
+    this.jarak,
     this.lokasi,
+    this.skor,
+    this.prioritas,
     this.createdAt,
   });
   FasilitasModel copy({
@@ -22,7 +32,12 @@ class FasilitasModel {
     final String? nama,
     final int? kerusakan,
     final String? kecamatan,
+    final int? kepadatan,
+    final int? jumlahPenduduk,
     final LatLng? lokasi,
+    final double? jarak,
+    final double? skor,
+    final int? prioritas,
     final DateTime? createdAt,
   }) {
     return FasilitasModel(
@@ -30,7 +45,12 @@ class FasilitasModel {
       nama: nama ?? this.nama,
       kerusakan: kerusakan ?? this.kerusakan,
       kecamatan: kecamatan ?? this.kecamatan,
+      kepadatan: kepadatan ?? this.kepadatan,
+      jumlahPenduduk: jumlahPenduduk ?? this.jumlahPenduduk,
+      jarak: jarak ?? this.jarak,
       lokasi: lokasi ?? this.lokasi,
+      skor: skor ?? this.skor,
+      prioritas: prioritas ?? this.prioritas,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -40,9 +60,12 @@ class FasilitasModel {
 
     return FasilitasModel(
       id: id,
-      nama: map['nama'] ?? '',
-      kerusakan: map['kerusakan'] ?? 0,
-      kecamatan: map['kecamatan'] ?? '',
+      nama: map['nama_fasilitas'] ?? '',
+      kerusakan: map['tingkat_kerusakan'] ?? 0,
+      kecamatan: map['lokasi_kecamatan'] ?? '',
+      jarak: map['jarak_ke_istana'] ?? 0,
+      kepadatan: map['kepadatan_penduduk'] ?? 0,
+      jumlahPenduduk: map['jumlah_penduduk'] ?? 0,
       lokasi: LatLng(lokasiMap['lat'] ?? 0.0, lokasiMap['lng'] ?? 0.0),
       createdAt: (map['created_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
@@ -52,10 +75,16 @@ class FasilitasModel {
 
     return FasilitasModel(
       nama: map['nama_fasilitas'] ?? '',
+      kerusakan: map['tingkat_kerusakan'] ?? 0,
+      kecamatan: map['lokasi_kecamatan'],
+      jarak: map['jarak_ke_istana'] ?? 0,
+      kepadatan: map['kepadatan_penduduk'],
       lokasi: LatLng(
         lokasiMap['latitude'] ?? 0.0,
         lokasiMap['longitude'] ?? 0.0,
       ),
+      jumlahPenduduk: map['jumlah_penduduk'],
+      createdAt: (map['created_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
   }
 

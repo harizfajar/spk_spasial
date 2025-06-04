@@ -5,6 +5,8 @@ import 'package:latlong2/latlong.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:spk/model/fasilitas_model.dart';
 import 'package:spk/services/firebase_services.dart';
+import 'package:spk/services/haversine_services.dart';
+import 'package:spk/widgets/notif.dart';
 
 part 'perbaikan_notifier.g.dart';
 
@@ -35,85 +37,107 @@ class BoolNotifier extends _$BoolNotifier {
   }
 }
 
+final firebase = FirebaseServices();
+
 @riverpod
 class PerbaikanNotifier extends _$PerbaikanNotifier {
   @override
-  FasilitasModel build() {
+  FutureOr<FasilitasModel> build() {
     return FasilitasModel();
   }
 
-  void lokasi(FasilitasModel fasilitas) {
-    state = fasilitas.copy(lokasi: fasilitas.lokasi);
-  }
-
   void setLocation(LatLng location) {
-    state = state.copy(lokasi: location);
+    final current = state.value ?? FasilitasModel();
+    state = AsyncData(current.copy(lokasi: location));
   }
 
   void fasilitas(String fasilitas) {
-    state = state.copy(nama: fasilitas);
+    final current = state.value ?? FasilitasModel();
+    state = AsyncData(current.copy(nama: fasilitas));
   }
 
-  void kecamatan(String kecamatan) {
-    state = state.copy(kecamatan: kecamatan);
+  void kecamatan(String value) {
+    final current = state.value ?? FasilitasModel();
+    state = AsyncData(current.copy(kecamatan: value));
   }
 
-  void kerusakan(int kerusakan) {
-    state = state.copy(kerusakan: kerusakan);
+  void kerusakan(int value) {
+    final current = state.value ?? FasilitasModel();
+    state = AsyncData(current.copy(kerusakan: value));
   }
 
-  void addPerbaikan(
-    BuildContext context, {
-    String? namaFasilitas,
-    int? tingkatKerusakan,
-    String? lokasiKecamatan,
-    LatLng? lokasi,
-    double? jarak,
-  }) {
-    final firebase = FirebaseServices();
+  Future<void> addPerbaikan(BuildContext context) async {
+    final IstanaPresiden = ref.watch(istanaPresidenNotifierProvider);
+
+    final current = state.value;
+    final jarak = hitungJarak(
+      current!.lokasi!.latitude,
+      current.lokasi!.longitude,
+      IstanaPresiden!.latitude,
+      IstanaPresiden.longitude,
+    );
+    final nama = current.nama;
+    final kecamatan = current.kecamatan;
+    final kerusakan = current.kerusakan;
+    final lokasi = current.lokasi;
+    state = const AsyncLoading(); // Tunjukkan loading
+    debugPrint("kecamatan $kecamatan");
+    try {
+      final kecamatanSnap =
+          await FirebaseFirestore.instance
+              .collection("kecamatan")
+              .where("nama", isEqualTo: kecamatan)
+              .limit(1)
+              .get();
+
+      if (kecamatanSnap.docs.isEmpty) {
+        throw Exception("Data kecamatan tidak ditemukan");
+      }
+
+      final kecamatanData = kecamatanSnap.docs.first.data();
+      final jumlahWarga = kecamatanData["jumlah_warga_terdampak"];
+      final kepadatanPenduduk = kecamatanData["kepadatan_penduduk"];
+
+      await firebase.addPerbaikan(
+        namaFasilitas: nama,
+        tingkatKerusakan: kerusakan,
+        lokasiKecamatan: kecamatan,
+        kepadatan: kepadatanPenduduk,
+        jumlahPenduduk: jumlahWarga,
+        lokasi: lokasi,
+        jarakKeIstana: jarak,
+      );
+
+      state = AsyncData(FasilitasModel()); // Reset state setelah submit
+      showSnackBar(context, message: "Data berhasil disimpan");
+      context.pop();
+    } catch (e, st) {
+      state = AsyncError(e, st);
+      debugPrint("Gagal menyimpan data: $e");
+      showSnackBar(context, message: "Data gagal disimpan $e");
+    }
+  }
+
+  void deletePerbaikan(BuildContext context, String? id) {
     firebase
-        .addPerbaikan(
-          namaFasilitas: namaFasilitas,
-          tingkatKerusakan: tingkatKerusakan,
-          lokasiKecamatan: lokasiKecamatan,
-          lokasi: lokasi,
-          jarakKeKecamatan: jarak,
-        )
-        .then((value) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text("Data berhasil disimpan")));
-          context.pop();
+        .deletePerbaikan(id: id)
+        .then((_) {
+          showSnackBar(context, message: "Data berhasil dihapus");
         })
         .catchError((error) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Gagal menyimpan data: $error")),
-          );
+          debugPrint("error: $error");
+          showSnackBar(context, message: "Gagal menghapus data: $error");
         });
   }
 }
 
-final fasilitasRusakProvider = StreamProvider<List<FasilitasModel>>((ref) {
-  return FirebaseFirestore.instance
-      .collection("fasilitas_umum")
-      .snapshots()
-      .map(
-        (snapshots) =>
-            snapshots.docs
-                .map(
-                  (doc) => FasilitasModel.fromMapLokasi(doc.data(), id: doc.id),
-                )
-                .toList(),
-      );
-});
-
 final List<String> namaKecamatan = [
-  "BOGOR SELATAN",
-  "BOGOR UTARA",
-  "BOGOR TIMUR",
-  "BOGOR BARAT",
-  "BOGOR TENGAH",
-  "TANAH SAREAL",
+  "Bogor Selatan",
+  "Bogor Utara",
+  "Bogor Timur",
+  "Bogor Barat",
+  "Bogor Tengah",
+  "Tanah Sereal",
 ];
 
 final Map<int, String> tingkatKerusakan = {

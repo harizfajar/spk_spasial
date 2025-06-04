@@ -4,11 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:spk/pages/fasilitasPerbaikan/notifier/perbaikan_notifier.dart';
+import 'package:spk/model/fasilitas_model.dart';
 import 'package:spk/pages/map/notifier/maps_notifier.dart';
 import 'package:spk/route/route_names.dart';
-import 'package:spk/services/haversine_services.dart';
 import 'package:spk/widgets/drawer.dart';
+import 'package:spk/widgets/text.dart';
 
 class Maps extends ConsumerStatefulWidget {
   const Maps({super.key});
@@ -20,13 +20,14 @@ class Maps extends ConsumerStatefulWidget {
 class _MapsState extends ConsumerState<Maps> {
   LatLng? currentPosition;
   final MapController mapController = MapController();
-  LatLng? initialPosition;
 
   @override
   void initState() {
     super.initState();
     // determinePosition();
-    ref.read(lokasiNotifierProvider.notifier).updateLocation();
+    Future.microtask(() {
+      ref.read(lokasiNotifierProvider.notifier).updateLocation();
+    });
   }
 
   @override
@@ -79,40 +80,41 @@ class _MapsState extends ConsumerState<Maps> {
                               ),
                             ),
                             markerSize: const Size(35, 35),
-                            markerDirection: MarkerDirection.heading,
+                            markerDirection: MarkerDirection.top,
                           ),
                         ),
                         MarkerLayer(
                           markers: [
                             ...fasilitasList.map((f) {
                               return Marker(
-                                width: 40,
-                                height: 40,
                                 point: LatLng(
                                   f.lokasi!.latitude,
                                   f.lokasi!.longitude,
                                 ),
-                                child: Icon(
-                                  f.nama == "Jalan"
-                                      ? Icons.remove_road
-                                      : f.nama == "Saluran Air"
-                                      ? Icons.water
-                                      : Icons.light,
-                                  color:
-                                      f.nama == "Jalan"
-                                          ? Colors.red
-                                          : f.nama == "Saluran Air"
-                                          ? Colors.blue
-                                          : Colors.orange,
-                                  size: 40,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    BottomSheet(context, f);
+                                  },
+                                  child: Icon(
+                                    f.nama == "Jalan"
+                                        ? Icons.remove_road
+                                        : f.nama == "Saluran Air"
+                                        ? Icons.water
+                                        : Icons.light_mode_outlined,
+                                    color:
+                                        f.nama == "Jalan"
+                                            ? Colors.red
+                                            : f.nama == "Saluran Air"
+                                            ? Colors.blue
+                                            : Colors.orange,
+                                    size: 20,
+                                  ),
                                 ),
                               );
                             }),
                             // Marker lokasi yang dipilih user (tap)
                             if (currentPosition != null)
                               Marker(
-                                width: 40,
-                                height: 40,
                                 point: currentPosition!,
                                 child: Icon(
                                   Icons.add_location_alt,
@@ -189,4 +191,56 @@ class _MapsState extends ConsumerState<Maps> {
       ),
     );
   }
+
+  Future<dynamic> BottomSheet(BuildContext context, FasilitasModel fasilitas) {
+    return showModalBottomSheet(
+      context: context,
+      builder:
+          (_) => SizedBox(
+            height: 300,
+            width: double.infinity,
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: TextCust(
+                      text: "Informasi Fasilitas Rusak",
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Container(
+                    height: 140,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.grey,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(Icons.image),
+                  ),
+                  Text("Fasilitas: ${fasilitas.nama}"),
+                  Text("Tingkat Kerusakan: ${kerusakan(fasilitas)}"),
+                  Text(
+                    "Tanggal Laporan: ${fasilitas.createdAt?.toLocal().toString().split(' ')[0] ?? '-'}",
+                  ),
+                // Tambahkan data lain jika perlu
+                ],
+              ),
+            ),
+          ),
+    );
+  }
+}
+
+String? kerusakan(FasilitasModel fasilitas) {
+  const tingkat = {
+    1: "Ringan",
+    2: "Sedang",
+    3: "Berat",
+    4: "Sangat Berat",
+    5: "Rusak Total",
+  };
+  return tingkat[fasilitas.kerusakan];
 }

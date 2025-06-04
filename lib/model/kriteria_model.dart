@@ -35,6 +35,10 @@ class KriteriaModel {
     );
   }
 
+  Map<String, dynamic> toMap() {
+    return {'kode': kode, 'nama': nama, 'bobot': bobot, 'jenis': jenis};
+  }
+
   factory KriteriaModel.fromFirestore(
     DocumentSnapshot<Map<String, dynamic>> doc,
   ) {
